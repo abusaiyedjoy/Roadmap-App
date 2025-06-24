@@ -1,16 +1,26 @@
-import { MongoClient, ServerApiVersion } from "mongodb";
+import { MongoClient, ServerApiVersion, ObjectId } from "mongodb";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-const app = express();
-const port = process.env.PORT | 3000;
+
 dotenv.config();
 
-app.use(cors());
+const app = express();
+const port = process.env.PORT || 3000;
+
+const allowedOrigins = [
+  "https://roadmapapp.netlify.app",
+  "http://localhost:5173",
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
+
 app.use(express.json());
 
 const uri = process.env.DB_URL;
-console.log("URL", uri);
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -23,6 +33,92 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
+
+    const featuresCollection = client.db("Roadmap-App").collection("features");
+    const commentsCollection = client.db("Roadmap-App").collection("comments");
+
+    // Get all features
+    app.get("/features", async (req, res) => {
+      try {
+        const result = await featuresCollection.find().toArray();
+        res.send(result);
+      } catch (err) {
+        res.status(500).send({ error: err.message });
+      }
+    });
+
+    // Get all comments
+    app.get("/comments/:featureId", async (req, res) => {
+      try {
+        const featureId = req.params.featureId;
+        const comments = await commentsCollection
+          .find({ featureId })
+          .sort({ createdAt: 1 })
+          .toArray();
+
+        const formatReplies = (comments) =>
+          comments.map((c) => ({
+            ...c,
+            replies: [],
+          }));
+
+        res.send(formatReplies(comments));
+      } catch (err) {
+        res.status(500).send({ error: err.message });
+      }
+    });
+
+    // Add a new comment
+    app.post("/comments", async (req, res) => {
+      try {
+        const { featureId, text, parentId = null, depth = 0 } = req.body;
+
+        const newComment = {
+          featureId,
+          text,
+          parentId,
+          depth,
+          createdAt: new Date(),
+        };
+
+        const result = await commentsCollection.insertOne(newComment);
+
+        res.send({ insertedId: result.insertedId });
+      } catch (err) {
+        res.status(500).send({ error: err.message });
+      }
+    });
+
+    // Delete a comment
+    app.delete("/comments/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const result = await commentsCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        res.send(result);
+      } catch (err) {
+        res.status(500).send({ error: err.message });
+      }
+    });
+
+    // Edit a comment
+    app.put("/comments/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const { newText } = req.body;
+
+        const result = await commentsCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { text: newText } }
+        );
+
+        res.send(result);
+      } catch (err) {
+        res.status(500).send({ error: err.message });
+      }
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
@@ -31,7 +127,8 @@ async function run() {
     console.error(error);
   }
 }
-run()
+
+run();
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

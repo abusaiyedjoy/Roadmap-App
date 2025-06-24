@@ -16,6 +16,8 @@ const SignIn = () => {
       .then(() => {
         toast.success("Signed in user");
         navigate("/home"); 
+        setEmail("")
+        setPassword("")
       })
       .catch((err) => {
         toast.error( err.message);

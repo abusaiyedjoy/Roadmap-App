@@ -7,19 +7,28 @@ const SignUp = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { createUser } = useContext(AuthContext);
+  const { createUser, updateUserProfile } = useContext(AuthContext);
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault();
     createUser(email, password)
       .then(() => {
+        return updateUserProfile({
+          displayName: name,
+        });
+      })
+      .then(() => {
         toast.success("User created successfully");
-        navigate("/home")
+        navigate("/home");
+        setName("");
+        setEmail("");
+        setPassword("");
       })
       .catch((err) => {
         toast.error(err.message);
       });
+
   };
 
   return (

@@ -1,64 +1,53 @@
 /* eslint-disable react/no-unescaped-entities */
-import { useState } from "react";
-import RoadmapCard from "./RoadmapCard"
+import { useEffect, useState } from "react";
+import RoadmapCard from "./RoadmapCard";
+import toast from "react-hot-toast";
 
-const cardsData = [
-  {
-    status: 'Planning',
-    title: 'Advanced Search Functionality',
-    description: 'Implement advanced filtering and search capabilities...',
-    votes: 15,
-    comments: 1,
-  },
-  {
-    status: 'Progress',
-    title: 'Mobile App Development',
-    description: 'Create native mobile apps for iOS and Android...',
-    votes: 28,
-    comments: 0,
-  },
-  {
-    status: 'Completed',
-    title: 'Performance Optimization',
-    description: 'Improve loading times and overall app performance...',
-    votes: 42,
-    comments: 0,
-  },
-  {
-    status: 'Planning',
-    title: 'Dark Mode Support',
-    description: 'Add dark theme option with automatic switching...',
-    votes: 33,
-    comments: 0,
-  },
-  {
-    status: 'Planning',
-    title: 'Multi-language Support',
-    description: 'Enable app translation to support global users...',
-    votes: 21,
-    comments: 3,
-  },
-  {
-    status: 'Progress',
-    title: 'Collaboration Tools',
-    description: 'Add @mentions, shared threads, and real-time editing...',
-    votes: 19,
-    comments: 2,
-  },
-  {
-    status: 'Completed',
-    title: 'Bug Reporting Flow',
-    description: 'Provide users an easy way to report bugs directly...',
-    votes: 50,
-    comments: 6,
-  },
-];
 
 const Home = () => {
-  const [category, setCategory] = useState("All");
-  const [status, setStatus] = useState("All");
+  const [category, setCategory] = useState("All Categories");
+  const [status, setStatus] = useState("All Status");
   const [sortBy, setSortBy] = useState("Most Popular");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [search, setSearch] = useState("");
+  const [roadmap, setRoadmap] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('https://abusaiyedjoyserver.vercel.app/features');
+        const data = await res.json();
+        setRoadmap(data);
+      } catch (error) {
+        console.error("Error fetching features:", error);
+        toast.error('Failed to fetch roadmap items');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) return <p className="flex justify-center items-center min-h-screen text-3xl animate-spin">⭐</p>;
+
+  const filteredData = roadmap
+    .filter((item) => {
+      const Search = item.title.toLowerCase().includes(search.toLowerCase());
+      const Category = category === "All Categories" || item.title.toLowerCase().includes(category.toLowerCase());
+      const Status = status === "All Status" || item.status.toLowerCase() === status.toLowerCase();
+      return Search && Category && Status;
+    })
+    .sort((a, b) => {
+      if (sortBy === "Most Popular") {
+        return b.votes - a.votes;
+      } else if (sortBy === "Newest") {
+        return b.comments - a.comments;
+      } else if (sortBy === "Oldest") {
+        return a.comments - b.comments;
+      }
+      return 0;
+    });
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-6">
@@ -93,8 +82,8 @@ const Home = () => {
               className="border rounded-md px-3 py-2 text-sm w-full md:w-50"
             >
               <option>All Status</option>
-              <option>Planned</option>
-              <option>In Progress</option>
+              <option>Planning</option>
+              <option>Progress</option>
               <option>Completed</option>
             </select>
           </div>
@@ -117,27 +106,26 @@ const Home = () => {
             <input
               type="text"
               placeholder="🔍 Search roadmap items"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="border rounded-md px-3 py-2 text-sm w-full md:w-60"
             />
           </div>
         </div>
 
-        <div className="px-4 py-10">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {cardsData?.map((item, index) => (
-              <RoadmapCard key={index} {...item} />
-            ))}
+        {filteredData?.length > 0 ? (
+          <div className="px-4 py-10">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 gap-6">
+              {filteredData.map((item, index) => (
+                <RoadmapCard key={index} feature={item} />
+              ))}
+            </div>
           </div>
-        </div>
-
-        {/* No Roadmap Items Message */}
-        <div className="bg-white border border-gray-200 rounded-md py-10 text-center text-gray-500 shadow-sm">
-          No roadmap items found matching your criteria.
-        </div>
-
-
+        ) : (
+          <div className="bg-white border border-gray-200 rounded-md py-10 text-center text-gray-500 shadow-sm">
+            No roadmap items found matching your criteria.
+          </div>
+        )}
       </div>
     </div>
   );
