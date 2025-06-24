@@ -41,6 +41,7 @@ const RoadmapCard = ({ status, title, description, votes, comments }) => {
 
       {/* Comment Section */}
       {showComments && (
+        
         <div className="mt-6 border-t pt-4">
           <h4 className="text-sm font-semibold mb-2 text-gray-700">Discussion</h4>
 

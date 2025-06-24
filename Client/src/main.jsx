@@ -11,6 +11,8 @@ import LandingPage from './Pages/LandingPage.jsx';
 import SignIn from './Pages/SignIn.jsx';
 import SignUp from './Pages/SignUp';
 import Home from './Pages/Home/Home.jsx';
+import AuthProvider from './Provider/AuthProvider.jsx';
+import {Toaster} from "react-hot-toast"
 
 const router = createBrowserRouter([
   {
@@ -27,18 +29,21 @@ const router = createBrowserRouter([
       },
       {
         path: "/signin",
-        element: <SignIn/>
+        element: <SignIn />
       },
       {
         path: "/signup",
-        element: <SignUp/>
+        element: <SignUp />
       },
     ]
   }
 ]);
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <RouterProvider router={router} />
-  </StrictMode>,
+  <AuthProvider>
+    <StrictMode>
+      <Toaster/>
+      <RouterProvider router={router} />
+    </StrictMode>,
+  </AuthProvider> 
 )
