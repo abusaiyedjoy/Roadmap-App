@@ -22,7 +22,7 @@ const RoadmapCard = ({ feature }) => {
   };
 
   useEffect(() => {
-    fetch(`https://abusaiyedjoyserver.vercel.app/comments/${featureId}`)
+    fetch(`https://roadmap-app-1par.onrender.com/comments/${featureId}`)
       .then((res) => res.json())
       .then((data) => setCommentList(nestedComments(data)))
       .catch(() => toast.error("Failed to load comments."));
@@ -54,7 +54,7 @@ const RoadmapCard = ({ feature }) => {
       return toast.error(`Max ${MaxCheracters} characters allowed.`);
 
     try {
-      const res = await fetch("https://abusaiyedjoyserver.vercel.app/comments", {
+      const res = await fetch("https://roadmap-app-1par.onrender.com/comments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -104,7 +104,7 @@ const RoadmapCard = ({ feature }) => {
       return toast.error(`Max ${MaxCheracters} characters allowed.`);
 
     try {
-      const res = await fetch("https://abusaiyedjoyserver.vercel.app/comments", {
+      const res = await fetch("https://roadmap-app-1par.onrender.com/comments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -149,7 +149,7 @@ const RoadmapCard = ({ feature }) => {
       return toast.error(`Max ${MaxCheracters} characters allowed.`);
 
     try {
-      const res = await fetch(`https://abusaiyedjoyserver.vercel.app/comments/${id}`, {
+      const res = await fetch(`https://roadmap-app-1par.onrender.com/comments/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ newText }),
@@ -174,7 +174,7 @@ const RoadmapCard = ({ feature }) => {
 
   const handleDelete = async (id) => {
     try {
-      const res = await fetch(`https://abusaiyedjoyserver.vercel.app/comments/${id}`, {
+      const res = await fetch(`https://roadmap-app-1par.onrender.com/comments/${id}`, {
         method: "DELETE",
       });
 

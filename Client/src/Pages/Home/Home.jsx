@@ -4,18 +4,19 @@ import RoadmapCard from "./RoadmapCard";
 import toast from "react-hot-toast";
 
 
+
 const Home = () => {
   const [category, setCategory] = useState("All Categories");
   const [status, setStatus] = useState("All Status");
   const [sortBy, setSortBy] = useState("Most Popular");
   const [search, setSearch] = useState("");
-  const [roadmap, setRoadmap] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [roadmap, setRoadmap] = useState(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('https://abusaiyedjoyserver.vercel.app/features');
+        const res = await fetch('https://roadmap-app-1par.onrender.com/features');
         const data = await res.json();
         setRoadmap(data);
       } catch (error) {
